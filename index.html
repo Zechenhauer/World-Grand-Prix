@@ -21,6 +21,41 @@
         .app-main-header h1 { color: #f59e0b; font-size: 26px; font-weight: 900; margin: 0; letter-spacing: 1px; text-transform: uppercase; }
         .app-main-header .app-subtitle { color: #94a3b8; font-size: 13px; font-weight: 600; margin-top: 4px; }
 
+        /* Info-Boxen Design */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        @media (max-width: 768px) {
+            .info-grid { grid-template-columns: 1fr; }
+        }
+        .info-card {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+        .info-card h3 {
+            color: #f59e0b;
+            font-size: 14px;
+            margin-top: 0;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 5px;
+        }
+        .info-card ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+        .info-card li {
+            margin-bottom: 4px;
+        }
+
         .day-section { margin-bottom: 35px; }
         .day-title { font-size: 16px; font-weight: 800; color: #f59e0b; border-bottom: 2px solid #334155; padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
 
@@ -162,6 +197,25 @@
         <div class="app-main-header">
             <h1>🎯 World Grand Prix 2026</h1>
             <div class="app-subtitle">Turnierübersicht & Live-Verwaltung</div>
+        </div>
+
+        <!-- Info-Sektion (Modus & TV) -->
+        <div class="info-grid">
+            <div class="info-card">
+                <h3>📺 Live im TV & Stream</h3>
+                <ul>
+                    <li><strong>TV:</strong> SPORT1</li>
+                    <li><strong>Stream:</strong> SPORT1.de, DAZN</li>
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3>⚙️ Modus & Format 2026</h3>
+                <ul>
+                    <li><strong>Besonderheit:</strong> Double-In / Double-Out (einziges Major)</li>
+                    <li><strong>Satzformat:</strong> Best of 5 Legs (kein Tie-Break)</li>
+                    <li><strong>Distanzen:</strong> 1. Runde (Best of 3) | AF & VF (Best of 5) | HF (Best of 9) | Finale (Best of 11)</li>
+                </ul>
+            </div>
         </div>
 
         <!-- Montag, 28.09.2026 (Fest hinterlegt) -->
