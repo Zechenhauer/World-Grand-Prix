@@ -198,33 +198,36 @@
             align-items: center;
             padding: 20px 10px;
             backdrop-filter: blur(5px);
-            overflow-y: auto; /* Erlaubt das Scrollen des Hintergrunds, falls nötig */
+            overflow-y: auto;
         }
         .modal-card {
-            background: transparent;
+            background: #1e293b;
             max-width: 600px;
             width: 100%;
             position: relative;
             margin: auto;
-            max-height: 90vh; /* Begrenzt die Höhe auf 90% des Bildschirms */
-            overflow-y: auto;  /* Macht den Inhalt bei langen Steckbriefen scrollbar */
-            padding-top: 40px; /* Platz für den fixierten Schließen-Button */
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 40px 20px 20px 20px;
+            border-radius: 14px;
+            border: 1px solid #334155;
             animation: modalPop 0.25s ease-out;
+            text-align: center;
         }
         @keyframes modalPop {
             0% { transform: scale(0.95); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
         .modal-close {
-            position: fixed; /* Klebt oben rechts am Viewport oder scrollt mit */
-            top: 15px; right: 20px;
+            position: absolute;
+            top: 15px; right: 15px;
             background: #f59e0b;
             border: none;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
             color: #0f172a;
             cursor: pointer;
-            width: 44px; height: 44px;
+            width: 36px; height: 36px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
@@ -234,69 +237,14 @@
         .modal-card img {
             width: 100%;
             height: auto;
-            border-radius: 12px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-            border: 2px solid #334155;
+            border-radius: 8px;
             display: block;
         }
-
-        /* Admin-Bereich Styles */
-        .admin-section {
-            background-color: #1e293b;
-            border: 2px dashed #f59e0b;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 50px;
-        }
-        .admin-section h2 {
-            color: #f59e0b;
-            font-size: 18px;
-            margin-top: 0;
-            text-transform: uppercase;
-        }
-        .admin-form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .admin-group {
-            margin-bottom: 10px;
-        }
-        .admin-group label {
-            display: block;
-            font-size: 11px;
-            color: #94a3b8;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
-        .admin-group input, .admin-group select {
-            width: 100%;
-            padding: 8px 10px;
-            background-color: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 6px;
-            color: #f8fafc;
-            font-size: 13px;
-        }
-        .admin-btn {
-            background-color: #f59e0b;
-            color: #0f172a;
-            border: none;
-            padding: 10px 20px;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            text-transform: uppercase;
-            width: 100%;
+        #modalErrorText {
+            color: #ef4444;
             font-size: 14px;
-        }
-        .admin-btn:hover { background-color: #d97706; }
-        
-        .login-box {
-            text-align: center;
-            padding: 20px 0;
+            padding: 30px;
+            display: none;
         }
     </style>
 </head>
@@ -508,11 +456,12 @@
 
     </div>
 
-    <!-- SCROLLBARES SPIELER STECKBRIEF MODAL -->
+    <!-- SPIELER STECKBRIEF MODAL -->
     <div class="modal-overlay" id="playerModal" onclick="closePlayerModal(event)">
         <button class="modal-close" onclick="closeModalDirect()">×</button>
         <div class="modal-card" onclick="event.stopPropagation()">
-            <img id="modalProfileImg" src="" alt="Spieler Steckbrief">
+            <img id="modalProfileImg" src="" alt="Spieler Steckbrief" onerror="handleImageError()">
+            <div id="modalErrorText">Für diesen Spieler konnte kein Bild geladen werden. Bitte prüfe, ob die Datei in Supabase im Bucket 'dart bilder' exakt so heißt.</div>
         </div>
     </div>
 
@@ -523,45 +472,61 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const TABLE_NAME = 'wgp_matches_2026';
 
-        // SUPABASE BILD-LINKS FÜR ALLE SPIELER
+        // VOLLSTÄNDIGE BILD-DATENBANK
         const playerProfileImages = {
-            "Andrew Gilding": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Andrew%20Gilding.png",
-            "Nathan Aspinall": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/aspinall.png",
-            "Cameron Menzies": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Cameron%20Menzies.png",
-            "Chris Dobey": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Chris%20Dobey.png",
-            "Damon Heta": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Damon%20Heta.png",
-            "Danny Noppert": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Danny%20Noppert.png",
-            "Dave Chisnall": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Dave%20Chisnall.png",
-            "Dirk van Duijvenbode": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Dirk%20van%20Duijvenbode.png",
-            "Gary Anderson": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Gary%20Anderson.png",
-            "Gerwyn Price": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Gerwyn%20Price.png",
-            "Gian van Veen": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Gian%20van%20Veen.png",
-            "James Wade": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/James%20Wade.png",
-            "Jermaine Wattimena": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Jermaine%20Wattimena.png",
-            "Joe Cullen": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Joe%20Cullen.png",
-            "Josh Rock": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Josh%20Rock.png",
-            "Krzysztof Ratajski": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Krzysztof%20Ratajski.png",
-            "Luke Humphries": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Luke%20Humphries.png",
-            "Luke Littler": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Luke%20Littler.png",
-            "Michael van Gerwen": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Michael%20van%20Gerwen.png",
-            "Niko Springer": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Niko%20Springer.png",
-            "Rob Cross": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Rob%20Cross.png",
-            "Ross Smith": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Ross%20Smith.png",
-            "Ryan Searle": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Ryan%20Searle.png",
-            "Stephen Bunting": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Stephen%20Bunting.png",
-            "Jonny Clayton": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Jonny%20Clayton.png",
-            "William O'Connor": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/William%20O'Connor.png"
+            "andrew gilding": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Andrew%20Gilding.png",
+            "nathan aspinall": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/aspinall.png",
+            "cameron menzies": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Cameron%20Menzies.png",
+            "chris dobey": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Chris%20Dobey.png",
+            "damon heta": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Damon%20Heta.png",
+            "danny noppert": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Danny%20Noppert.png",
+            "dave chisnall": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Dave%20Chisnall.png",
+            "dirk van duijvenbode": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Dirk%20van%20Duijvenbode.png",
+            "gary anderson": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Gary%20Anderson.png",
+            "gerwyn price": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Gerwyn%20Price.png",
+            "gian van veen": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Gian%20van%20Veen.png",
+            "james wade": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/James%20Wade.png",
+            "jermaine wattimena": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Jermaine%20Wattimena.png",
+            "joe cullen": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Joe%20Cullen.png",
+            "josh rock": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Josh%20Rock.png",
+            "krzysztof ratajski": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Krzysztof%20Ratajski.png",
+            "luke humphries": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Luke%20Humphries.png",
+            "luke littler": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Luke%20Littler.png",
+            "michael van gerwen": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Michael%20van%20Gerwen.png",
+            "niko springer": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Niko%20Springer.png",
+            "rob cross": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Rob%20Cross.png",
+            "ross smith": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Ross%20Smith.png",
+            "ryan searle": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Ryan%20Searle.png",
+            "stephen bunting": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Stephen%20Bunting.png",
+            "jonny clayton": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/Jonny%20Clayton.png",
+            "william o'connor": "https://lhusylpjnujlqomougmg.supabase.co/storage/v1/object/public/dart%20bilder/William%20O'Connor.png"
         };
 
         function openPlayerModal(playerName) {
-            let imgUrl = playerProfileImages[playerName];
+            if (!playerName) return;
+            let cleanKey = playerName.trim().toLowerCase();
+            let imgUrl = playerProfileImages[cleanKey];
+
+            let imgElement = document.getElementById('modalProfileImg');
+            let errorText = document.getElementById('modalErrorText');
+
+            errorText.style.display = 'none';
+            imgElement.style.display = 'block';
+
             if (imgUrl) {
-                document.getElementById('modalProfileImg').src = imgUrl;
+                imgElement.src = imgUrl;
                 document.getElementById('playerModal').style.display = 'flex';
-                document.body.style.overflow = 'hidden'; // Verhindert Scrollen im Hintergrund, wenn Modal offen ist
+                document.body.style.overflow = 'hidden';
             } else {
-                alert("Für " + playerName + " ist aktuell noch kein Steckbrief-Bild hinterlegt.");
+                alert("Für '" + playerName + "' ist aktuell noch kein Steckbrief-Bild hinterlegt.");
             }
+        }
+
+        function handleImageError() {
+            let imgElement = document.getElementById('modalProfileImg');
+            let errorText = document.getElementById('modalErrorText');
+            imgElement.style.display = 'none';
+            errorText.style.display = 'block';
         }
 
         function closePlayerModal(event) {
@@ -713,11 +678,14 @@
                     ? `Sätze: ${m.sets}&nbsp;&nbsp;|&nbsp;&nbsp;Legs: ${stats.l1}-${stats.l2}` 
                     : 'Status: Ausstehend';
 
+                let safeP1 = m.p1.replace(/'/g, "\\'");
+                let safeP2 = m.p2.replace(/'/g, "\\'");
+
                 grid.innerHTML += `
                     <div class="match-card" style="${cardStyle}">
                         <div class="match-header"><span>${headerText}</span>${badgeHtml}</div>
-                        <div class="${p1RowClass}"><span class="player-name" onclick="openPlayerModal('${m.p1}')">${m.p1}</span><span class="${s1Class}">${s1Text}</span></div>
-                        <div class="${p2RowClass}"><span class="player-name" onclick="openPlayerModal('${m.p2}')">${m.p2}</span><span class="${s2Class}">${s2Text}</span></div>
+                        <div class="${p1RowClass}"><span class="player-name" onclick="openPlayerModal('${safeP1}')">${m.p1}</span><span class="${s1Class}">${s1Text}</span></div>
+                        <div class="${p2RowClass}"><span class="player-name" onclick="openPlayerModal('${safeP2}')">${m.p2}</span><span class="${s2Class}">${s2Text}</span></div>
                         <div class="legs-detail"><span>${detailsText}</span></div>
                     </div>
                 `;
